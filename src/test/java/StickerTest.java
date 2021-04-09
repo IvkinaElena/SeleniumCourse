@@ -27,7 +27,7 @@ public class StickerTest {
     public void testSticker() {
         driver.get("http://localhost/litecart");
         for(WebElement element : driver.findElements(By.cssSelector(".product"))) {
-            assertTrue(element.findElement(By.cssSelector(".sticker")).isDisplayed());
+            assertTrue((element.findElement(By.cssSelector(".sticker")).isDisplayed()) && (element.findElements(By.cssSelector(".sticker")).size() == 1));
         }
 
     }

@@ -26,15 +26,10 @@ public class StickerTest {
     @Test
     public void testSticker() {
         driver.get("http://localhost/litecart");
-        for(WebElement element : driver.findElements(By.cssSelector("#box-most-popular li"))) {
+        for(WebElement element : driver.findElements(By.cssSelector(".product"))) {
             assertTrue(element.findElement(By.cssSelector(".sticker")).isDisplayed());
         }
-        for(WebElement element : driver.findElements(By.cssSelector("#box-campaigns li"))) {
-            assertTrue(element.findElement(By.cssSelector(".sticker")).isDisplayed());
-        }
-        for(WebElement element : driver.findElements(By.cssSelector("#box-latest-products li"))) {
-            assertTrue(element.findElement(By.cssSelector(".sticker")).isDisplayed());
-        }
+
     }
 
     @AfterAll

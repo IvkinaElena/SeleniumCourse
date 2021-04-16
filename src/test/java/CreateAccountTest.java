@@ -1,9 +1,11 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.Select;
+
+import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +19,7 @@ public class CreateAccountTest {
     private final String address1 = "my address";
     private final String postcode = "12345";
     private final String city = "Washington";
+    private final String country = "United States";
     private final String phone = "+1234567890";
     private String createEmail() {
         Random RANDOM = new Random();
@@ -26,6 +29,8 @@ public class CreateAccountTest {
 
     @BeforeAll
     public void setup() {
+        //WebDriverManager.firefoxdriver().setup();
+        //driver = new FirefoxDriver();
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -40,8 +45,8 @@ public class CreateAccountTest {
         driver.findElement(By.name("address1")).sendKeys(address1);
         driver.findElement(By.name("postcode")).sendKeys(postcode);
         driver.findElement(By.name("city")).sendKeys(city);
-        Select select = new Select(driver.findElement(By.name("country_code")));
-        select.selectByVisibleText("United States");
+        driver.findElement(By.className("select2")).click();
+        driver.findElement(By.className("select2-search__field")).sendKeys(country + Keys.ENTER);
         String uniqueEmail = createEmail();
         driver.findElement(By.name("email")).sendKeys(uniqueEmail);
         driver.findElement(By.name("phone")).sendKeys(phone);

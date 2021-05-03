@@ -1,3 +1,6 @@
+import PageObjects.CartPage;
+import PageObjects.MainPage;
+import PageObjects.ProductPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -11,55 +14,53 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CartTest {
     private WebDriver driver;
-    private final String baseUrl = "http://localhost/litecart";
+    private MainPage mainPage;
+    private ProductPage productPage;
+    private CartPage cartPage;
 
     @BeforeAll
     public void setup() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        mainPage = new MainPage(driver);
+        productPage = new ProductPage(driver);
+        cartPage = new CartPage(driver);
     }
 
     @Test
     public void testCart() throws InterruptedException {
-        WebDriverWait wait = new WebDriverWait(driver, 5/*seconds*/);
-        driver.get(baseUrl);
+        mainPage.open();
         for(int i = 0; i < 3; i++) {
             //установлена пауза, т.к. не всегда происходит переход на страницу товара,
             // хотя команда Click() отрабатывает без ошибок (гипотеза, что плитка не имеет ссылки оказалась неверной)
             //wait.until(attributeContains(By.cssSelector(".product a"), "href", "http"));
             Thread.sleep(1000);
-            driver.findElement(By.cssSelector(".product a")).click();
+            mainPage.clickOnPlate();
             //иногда у товара обязательно указать размер
-            if (driver.findElements(By.name("options[Size]")).size() != 0) {
-                driver.findElement(By.name("options[Size]")).click();
-                driver.findElement(By.cssSelector("option[value='Small']")).click();
-            }
-            driver.findElement(By.name("add_cart_product")).click();
-            wait.until(textToBePresentInElementLocated(By.className("quantity"),String.valueOf(i+1)));
-            driver.findElement(By.id("logotype-wrapper")).click();
+            productPage.inputSize();
+            productPage.addProductToCart();
+            productPage.waitCountProductOfCart(i);
+            productPage.backToMainPage();
         }
         //так же пришлось добавить паузу, явные ожидания не помогали
         Thread.sleep(1000);
-        driver.findElement(By.xpath("//a[contains(text(), 'Checkout')]")).click();
+        mainPage.openCart();
 
-        int countRow = driver.findElements(By.cssSelector(".dataTable .item")).size();
-        int countProduct = driver.findElements(By.cssSelector(".shortcut a")).size();
+        int countRow = cartPage.getCountRow();
+        int countProduct = cartPage.getCountProduct();
         for(int i = 0; i < countProduct; i++) {
             Thread.sleep(1000);
             //проверяем изменение в таблице при удалении товара
             if(i != countProduct-1) {
-                WebElement shortcut = driver.findElement(By.cssSelector(".shortcut a"));
-                shortcut.click();
-                driver.findElement(By.name("remove_cart_item")).click();
-                wait.until(stalenessOf(shortcut));
-                Assertions.assertTrue(driver.findElements(By.cssSelector(".dataTable .item")).size() < countRow);
-                countRow = driver.findElements(By.cssSelector(".dataTable .item")).size();
+                cartPage.removeProduct();
+                Assertions.assertTrue(cartPage.getCountRow() < countRow);
+                countRow = cartPage.getCountRow();
             }
             //если товар в корзине единственный, проверяем текст на странице
             else {
-                driver.findElement(By.name("remove_cart_item")).click();
-                wait.until(textToBePresentInElementLocated(By.id("checkout-cart-wrapper"), "There are no items in your cart."));
+                cartPage.removeLastProduct();
+                cartPage.assertCartIsEmpty();
             }
         }
     }

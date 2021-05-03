@@ -33,8 +33,6 @@ public class CartTest {
         mainPage.open();
         for(int i = 0; i < 3; i++) {
             //установлена пауза, т.к. не всегда происходит переход на страницу товара,
-            // хотя команда Click() отрабатывает без ошибок (гипотеза, что плитка не имеет ссылки оказалась неверной)
-            //wait.until(attributeContains(By.cssSelector(".product a"), "href", "http"));
             Thread.sleep(1000);
             mainPage.clickOnPlate();
             //иногда у товара обязательно указать размер
